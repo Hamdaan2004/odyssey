@@ -10,18 +10,166 @@ class ProfPortalApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: "Dr. Ahmad's Portal",
+      title: "Dr. Saad's Portal",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF2563EB)),
         useMaterial3: true,
       ),
-      home: const MainLayoutNavigation(),
+      // App starts at Login, then transitions to Main Layout on Success
+      home: const LoginScreen(),
     );
   }
 }
 
-// In-Memory Local State Simulation
+// ==========================================
+// NEW MODULE: SECURE LOGIN SCREEN INTERFACE
+// ==========================================
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Simulation of Secure Handshake Verification Network Delay
+      Future.delayed(const Duration(milliseconds: 1200), () {
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Routing transition to the main schedule matrix dashboard
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainLayoutNavigation()),
+        );
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 440),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(32.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.school, size: 48, color: Color(0xFF2563EB)),
+                    const SizedBox(height: 16),
+                    const Text(
+                      "Welcome Back",
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    ),
+                    const Text(
+                      "Sign in to manage academic rows & rosters.",
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                    const SizedBox(height: 32),
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: "Email Address",
+                        prefixIcon: Icon(Icons.email_outlined),
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty || !value.contains('@')) {
+                          return 'Please enter a valid academic email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "Password",
+                        prefixIcon: Icon(Icons.lock_outline),
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty || value.length < 6) {
+                          return 'Password must be at least 6 characters long';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 32),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2563EB),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        ),
+                        onPressed: _isLoading ? null : _handleLogin,
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                              )
+                            : const Text("Sign In", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// CORE APP SCHEDULER & ATTENDANCE DASHBOARD
+// ==========================================
 class StudentState {
   final String id;
   final String roll;
@@ -38,7 +186,6 @@ class StudentState {
   });
 }
 
-// Layout Controller: Auto-adapts layout interface between phone screens and desktop browsers
 class MainLayoutNavigation extends StatefulWidget {
   const MainLayoutNavigation({super.key});
 
@@ -59,7 +206,7 @@ class _MainLayoutNavigationState extends State<MainLayoutNavigation> {
   void _navigateToAttendance(String courseTitle) {
     setState(() {
       _activeCourseTitle = courseTitle;
-      _selectedIndex = 1; // Switches view to the live tracking list
+      _selectedIndex = 1;
     });
   }
 
@@ -72,10 +219,24 @@ class _MainLayoutNavigationState extends State<MainLayoutNavigation> {
       AttendanceScreen(courseTitle: _activeCourseTitle, students: _mockStudents),
     ];
 
-    if (isDesktop) {
-      return Scaffold(
-        body: Row(
-          children: [
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Dr. Saad's Portal", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
+              );
+            },
+          )
+        ],
+      ),
+      body: Row(
+        children: [
+          if (isDesktop) ...[
             NavigationRail(
               selectedIndex: _selectedIndex,
               onDestinationSelected: (int index) => setState(() => _selectedIndex = index),
@@ -86,27 +247,24 @@ class _MainLayoutNavigationState extends State<MainLayoutNavigation> {
               ],
             ),
             const VerticalDivider(thickness: 1, width: 1),
-            Expanded(child: screens[_selectedIndex]),
           ],
-        ),
-      );
-    } else {
-      return Scaffold(
-        body: SafeArea(child: screens[_selectedIndex]),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _selectedIndex,
-          onDestinationSelected: (int index) => setState(() => _selectedIndex = index),
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Schedule'),
-            NavigationDestination(icon: Icon(Icons.check_circle_outline), label: 'Attendance'),
-          ],
-        ),
-      );
-    }
+          Expanded(child: screens[_selectedIndex]),
+        ],
+      ),
+      bottomNavigationBar: isDesktop
+          ? null
+          : NavigationBar(
+              selectedIndex: _selectedIndex,
+              onDestinationSelected: (int index) => setState(() => _selectedIndex = index),
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.calendar_month), label: 'Schedule'),
+                NavigationDestination(icon: Icon(Icons.check_circle_outline), label: 'Attendance'),
+              ],
+            ),
+    );
   }
 }
 
-// View Component 1: Weekly Timetable Layout Widget
 class TimetableScreen extends StatelessWidget {
   final Function(String) onClassTap;
   const TimetableScreen({super.key, required this.onClassTap});
@@ -167,7 +325,6 @@ class TimetableScreen extends StatelessWidget {
   }
 }
 
-// View Component 2: Roster Selection & Live Attendance Dashboard
 class AttendanceScreen extends StatefulWidget {
   final String courseTitle;
   final List<StudentState> students;
